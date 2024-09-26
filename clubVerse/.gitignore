@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*/migrations/*
+!*/migrations/__init__.py
+*.pyc
+vercel.json
+db.sqlite3
+build_files.sh

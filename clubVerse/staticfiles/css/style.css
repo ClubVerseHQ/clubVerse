@@ -1,0 +1,154 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+}
+::-webkit-scrollbar {
+    display: none;
+}
+
+#hero {
+    background-color: #282c34;
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+nav {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+nav .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: linear-gradient(to right, #4ae2c6, #7801b9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+nav .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+nav .nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+}
+
+.cta-btn {
+    background-color: white;
+    color: black;
+    padding: 15px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.cta-btn:hover {
+    background-color: #357ab9;
+}
+
+#features, #how-it-works, #testimonials, #cta {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.feature-grid, .steps-grid, .testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.feature-item, .step, .testimonial-item {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#cta {
+    background-color: #4a90e2;
+    color: #fff;
+    padding: 60px 20px;
+    text-align: center;
+    /* Adding space between text and button */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#cta h2 {
+    margin-bottom: 20px;
+}
+
+#cta p {
+    margin-bottom: 10px;
+}
+
+#cta .cta-btn {
+    background-color: #fff;
+    color: #4a90e2;
+    padding: 10px 25px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#cta .cta-btn:hover {
+    background-color: #e8f0fe;
+    color: #357ab9;
+    padding: 11px 26px;
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.social-links {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.social-links a {
+    color: #fff;
+    text-decoration: none;
+}
