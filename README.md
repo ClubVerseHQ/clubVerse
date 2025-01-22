@@ -1,6 +1,7 @@
 <h1 align="center">Club Verse</h1>
 
-![Club Verse](https://github.com/user-attachments/assets/2155932f-204a-4c6f-ab43-c28526469aec "Club Verse Logo")
+![Club Verse](https://github.com/user-attachments/assets/cebaff6f-dbc7-426b-92c3-472a641bc811)
+
 
 
 ![Status](https://img.shields.io/badge/status-in%20production-red)
