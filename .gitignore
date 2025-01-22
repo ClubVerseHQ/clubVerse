@@ -1,0 +1,10 @@
+.vscode
+.env
+env
+db.sqlite3
+__pycache__
+migrations
+staticfiles
+!migrations/__init__.py
+media/profile_pictures
+media/club_images/benjamin-voros-phIFdC6lA4E-unsplash.jpg

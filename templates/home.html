@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="relative pt-16">
+    <div class="absolute inset-0 z-0">
+        <img
+            src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1600"
+            alt="Background"
+            class="w-full h-[600px] object-cover filter brightness-50"
+        />
+    </div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-40">
+        <div class="text-center">
+            <h1 class="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
+                <span class="block">Welcome to ClubVerse</span>
+                <span class="block text-indigo-400">Where Passions Unite</span>
+            </h1>
+            <p class="mt-3 max-w-md mx-auto text-base text-gray-300 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                Join university clubs, connect with like-minded peers, and make the most of your campus life.
+            </p>
+            <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+                <div class="rounded-md shadow">
+                    <a
+                        href="{% url 'users:signup' %}"
+                        class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 transition-all duration-300"
+                    >
+                        Get Started
+                        {% comment %} {% url 'signup' %} {% endcomment %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Clubs Section -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Featured Clubs</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for club in featured_clubs %}
+        <div class="club-card group relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 backdrop-blur-lg backdrop-filter">
+            <div class="aspect-w-16 aspect-h-9">
+                <img
+                    src="{{ club.image_url }}"
+                    alt="{{ club.name }}"
+                    class="w-full h-48 object-cover"
+                />
+            </div>
+            <div class="p-6">
+                <div class="h-[120px]"> <!-- Fixed height container for title and description -->
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ club.name }}</h3>
+                    <p class="text-gray-600 dark:text-gray-300 line-clamp-2">{{ club.description }}</p>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ club.member_count }} members</span>
+                    <a href="#" class="inline-flex px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300">
+                        Join Club
+                        {% comment %} {% url 'join_club' club.id %} {% endcomment %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Events Section -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="{ activeTab: 'upcoming' }">
+    <div class="flex flex-col items-start">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Events</h2>
+        
+        <!-- Event Tabs -->
+        <div class="flex space-x-1 rounded-xl bg-gray-200 dark:bg-gray-700 p-1 mb-8">
+            <button 
+                @click="activeTab = 'upcoming'"
+                :class="{ 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white': activeTab === 'upcoming', 'text-gray-600 dark:text-gray-300': activeTab !== 'upcoming' }"
+                class="relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none"
+            >
+                Upcoming
+            </button>
+            <button 
+                @click="activeTab = 'ongoing'"
+                :class="{ 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white': activeTab === 'ongoing', 'text-gray-600 dark:text-gray-300': activeTab !== 'ongoing' }"
+                class="relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none"
+            >
+                Ongoing
+            </button>
+            <button 
+                @click="activeTab = 'past'"
+                :class="{ 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white': activeTab === 'past', 'text-gray-600 dark:text-gray-300': activeTab !== 'past' }"
+                class="relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none"
+            >
+                Past
+            </button>
+        </div>
+
+        <!-- Event Cards -->
+        <div class="w-full">
+            <!-- Upcoming Events -->
+            <div x-show="activeTab === 'upcoming'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for event in upcoming_events %}
+                <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+                    <div class="relative">
+                        <img src="{{ event.image_url }}" alt="{{ event.name }}" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm">
+                            {{ event.date|date:"M d, Y" }}
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-[100px]">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ event.name }}</h3>
+                            <p class="text-gray-600 dark:text-gray-300 line-clamp-2">{{ event.description }}</p>
+                        </div>
+                        <div class="mt-4 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="users" class="h-4 w-4 text-gray-500 dark:text-gray-400"></i>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ event.attendees_count }} attending</span>
+                            </div>
+                            <a href="#" class="inline-flex px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300">
+                                Register
+                                {% comment %} {% url 'register_event' event.id %} {% endcomment %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <i data-lucide="calendar" class="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400">No upcoming events scheduled</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Ongoing Events -->
+            <div x-show="activeTab === 'ongoing'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for event in ongoing_events %}
+                <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+                    <div class="relative">
+                        <img src="{{ event.image_url }}" alt="{{ event.name }}" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm">
+                            Happening Now
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-[100px]">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ event.name }}</h3>
+                            <p class="text-gray-600 dark:text-gray-300 line-clamp-2">{{ event.description }}</p>
+                        </div>
+                        <div class="mt-4 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="users" class="h-4 w-4 text-gray-500 dark:text-gray-400"></i>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ event.attendees_count }} attending</span>
+                            </div>
+                            <a href="#" class="inline-flex px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300">
+                                Join Now
+                                {% comment %} {% url 'join_event' event.id %} {% endcomment %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <i data-lucide="calendar" class="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400">No events currently in progress</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Past Events -->
+            <div x-show="activeTab === 'past'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for event in past_events %}
+                <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+                    <div class="relative">
+                        <img src="{{ event.image_url }}" alt="{{ event.name }}" class="w-full h-48 object-cover filter grayscale">
+                        <div class="absolute top-4 right-4 bg-gray-600 text-white px-3 py-1 rounded-full text-sm">
+                            {{ event.date|date:"M d, Y" }}
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-[100px]">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ event.name }}</h3>
+                            <p class="text-gray-600 dark:text-gray-300 line-clamp-2">{{ event.description }}</p>
+                        </div>
+                        <div class="mt-4 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="users" class="h-4 w-4 text-gray-500 dark:text-gray-400"></i>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ event.attendees_count }} attended</span>
+                            </div>
+                            <a href="#" class="inline-flex px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors duration-300">
+                                View Recap
+                                {% comment %} {% url 'event_recap' event.id %} {% endcomment %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <i data-lucide="calendar" class="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400">No past events to display</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

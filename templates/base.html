@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ClubVerse{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+
+    <style>
+        .backdrop-blur-md {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        .dark {
+            color-scheme: dark;
+        }
+
+        .club-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .club-card img {
+            transition: transform 0.3s ease;
+        }
+
+        [x-cloak] { display: none !important; }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dark .glass {
+            background: rgba(17, 24, 39, 0.7);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        // Tailwind Config
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'gradient': 'gradient 8s linear infinite',
+                        "caret-blink": "caret-blink 1.25s ease-out infinite",
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            }
+                        },
+                        caret-blink: {
+                            "0%,70%,100%": { opacity: "1" },
+                            "20%,50%": { opacity: "0" },
+                        },
+                    }
+                }
+            }
+        }
+
+        // Check for saved dark mode preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+</head>
+<body x-data="{ 
+    darkMode: localStorage.theme === 'dark', 
+    isMenuOpen: false,
+    toggleDarkMode() {
+        this.darkMode = !this.darkMode;
+        localStorage.theme = this.darkMode ? 'dark' : 'light';
+        if (this.darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }
+}" :class="darkMode ? 'dark bg-gray-900' : 'bg-gray-50'" class="min-h-screen transition-colors duration-300">
+    <!-- Navbar -->
+    <nav class="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 fixed w-full z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{% url 'home' %}" class="flex items-center">
+                        <i data-lucide="school" class="h-8 w-8 text-indigo-600 dark:text-indigo-400"></i>
+                        <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white">ClubVerse</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex md:items-center md:space-x-4">
+                    <div class="flex items-baseline space-x-4">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'users:dashboard' %}" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                                <i data-lucide="layout-dashboard" class="h-4 w-4 mr-2"></i>
+                                Dashboard
+                                {% comment %} {% url 'dashboard' %} {% endcomment %}
+                            </a>
+                            <a href="{% url 'clubs:clubs' %}" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                                <i data-lucide="users" class="h-4 w-4 mr-2"></i>
+                                Clubs
+                                {% comment %} {% url 'clubs' %} {% endcomment %}
+                            </a>
+                            <a href="{% url 'events:events' %}" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                                <i data-lucide="calendar" class="h-4 w-4 mr-2"></i>
+                                Events
+                                {% comment %} {% url 'events' %} {% endcomment %}
+                            </a>
+                            <a href="#" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                                <i data-lucide="bell" class="h-4 w-4 mr-2"></i>
+                                Notifications
+                                {% comment %} {% url 'notifications' %} {% endcomment %}
+                            </a>
+                            <a href="{% url 'users:logout' %}" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                                <i data-lucide="log-out" class="h-4 w-4 mr-2"></i>
+                                Logout
+                            </a>
+                        {% else %}
+                            <a href="{% url 'users:login' %}" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                                <i data-lucide="log-in" class="h-4 w-4 mr-2"></i>
+                                Login
+                            </a>
+                            <a href="{% url 'users:signup' %}" class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                                <i data-lucide="user-plus" class="h-4 w-4 mr-2"></i>
+                                Sign Up
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="border-l border-gray-200 dark:border-gray-700 h-6 mx-2"></div>
+                    <button @click="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300">
+                        <i x-show="!darkMode" data-lucide="moon" class="h-5 w-5 text-gray-700"></i>
+                        <i x-show="darkMode" data-lucide="sun" class="h-5 w-5 text-yellow-500"></i>
+                    </button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button @click="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300 mr-2">
+                        <i x-show="!darkMode" data-lucide="moon" class="h-5 w-5 text-gray-700"></i>
+                        <i x-show="darkMode" data-lucide="sun" class="h-5 w-5 text-yellow-500"></i>
+                    </button>
+                    <button @click="isMenuOpen = !isMenuOpen" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
+                        <i x-show="!isMenuOpen" data-lucide="menu" class="h-6 w-6"></i>
+                        <i x-show="isMenuOpen" data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div x-show="isMenuOpen" x-cloak class="md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                {% if user.is_authenticated %}
+                    <a href="#" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                        <i data-lucide="layout-dashboard" class="h-4 w-4 mr-2"></i>
+                        Dashboard
+                        {% comment %} {% url 'dashboard' %} {% endcomment %}
+                    </a>
+                    <a href="#" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                        <i data-lucide="users" class="h-4 w-4 mr-2"></i>
+                        Clubs
+                        {% comment %} {% url 'clubs' %} {% endcomment %}
+                    </a>
+                    <a href="#" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                        <i data-lucide="calendar" class="h-4 w-4 mr-2"></i>
+                        Events
+                        {% comment %} {% url 'events' %} {% endcomment %}
+                    </a>
+                    <a href="#" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                        <i data-lucide="bell" class="h-4 w-4 mr-2"></i>
+                        Notifications
+                        {% comment %} {% url 'notifications' %} {% endcomment %}
+                    </a>
+                    <a href="{% url 'users:logout' %}" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                        <i data-lucide="log-out" class="h-4 w-4 mr-2"></i>
+                        Logout
+                    </a>
+                {% else %}
+                    <a href="{% url 'users:login' %}" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                        <i data-lucide="log-in" class="h-4 w-4 mr-2"></i>
+                        Login
+                    </a>
+                    <a href="{% url 'users:signup' %}" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white transition-all duration-300">
+                        <i data-lucide="user-plus" class="h-4 w-4 mr-2"></i>
+                        Sign Up
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 dark:bg-gray-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">About ClubVerse</h3>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Connecting university students through shared interests and activities.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+                                Browse Clubs
+                                {% comment %} {% url 'browse_clubs' %} {% endcomment %}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+                                Create a Club
+                                {% comment %} {% url 'create_club' %} {% endcomment %}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+                                Events Calendar
+                                {% comment %} {% url 'events' %} {% endcomment %}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contact</h3>
+                    <ul class="space-y-2">
+                        <li class="text-gray-600 dark:text-gray-300">support@clubverse.edu</li>
+                        <li class="text-gray-600 dark:text-gray-300">+1 (555) 123-4567</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                <p class="text-center text-gray-500 dark:text-gray-400">
+                    © {% now "Y" %} ClubVerse. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Create icons when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+        
+        // Update icons when Alpine makes changes
+        document.addEventListener('alpine:initialized', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

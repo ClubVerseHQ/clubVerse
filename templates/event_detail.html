@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900" x-data="{
+    event: {{ event|escapejs }},
+    showMediaGallery: false,
+    currentMediaIndex: 0,
+    showReactionPicker: false,
+    replyingTo: null,
+    formatDate(date) {
+        return new Date(date).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    },
+    formatTime(time) {
+        return new Date(`1970-01-01T${time}`).toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    },
+    isEventActive(date) {
+        return new Date(date) > new Date();
+    }
+}">
+    <!-- Event Header -->
+    <div class="relative">
+        <!-- Event Cover Image -->
+        <div class="h-96 w-full relative">
+            <img src="{{ event.cover_image }}" alt="{{ event.title }}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        </div>
+
+        <!-- Event Title and Basic Info -->
+        <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h1 class="text-4xl font-bold mb-4">{{ event.title }}</h1>
+                        <div class="flex items-center space-x-6 text-lg">
+                            <div class="flex items-center">
+                                <i data-lucide="calendar" class="h-5 w-5 mr-2"></i>
+                                <span>{{ event.date|date:"F j, Y" }}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i data-lucide="clock" class="h-5 w-5 mr-2"></i>
+                                <span>{{ event.time }}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i data-lucide="map-pin" class="h-5 w-5 mr-2"></i>
+                                <span>{{ event.location }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Participate Button -->
+                    {% if not event.is_ended %}
+                    <button class="inline-flex items-center px-6 py-3 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+                        <i data-lucide="user-plus" class="h-5 w-5 mr-2"></i>
+                        Participate
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Event Details -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Event Description -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">About this Event</h2>
+                    <div class="prose dark:prose-invert max-w-none">
+                        {{ event.description|safe }}
+                    </div>
+                </div>
+
+                <!-- Media Gallery -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Media Gallery</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {% for media in event.media %}
+                        <div class="relative aspect-w-16 aspect-h-9 rounded-lg overflow-hidden cursor-pointer group"
+                             @click="showMediaGallery = true; currentMediaIndex = {{ forloop.counter0 }}">
+                            {% if media.type == 'image' %}
+                            <img src="{{ media.url }}" alt="" class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="relative w-full h-full">
+                                <img src="{{ media.thumbnail }}" alt="" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <i data-lucide="play-circle" class="h-12 w-12 text-white"></i>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div id="comments" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Comments</h2>
+                        <span class="text-gray-500 dark:text-gray-400">{{ event.comments.count }} comments</span>
+                    </div>
+
+                    <!-- Comment Input -->
+                    {% if user.is_authenticated %}
+                    <div class="flex space-x-4 mb-8">
+                        <img src="{{ user.avatar }}" alt="{{ user.name }}" class="h-10 w-10 rounded-full">
+                        <div class="flex-1">
+                            <textarea rows="3" 
+                                      class="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                      placeholder="Write a comment..."></textarea>
+                            <div class="mt-2 flex justify-between items-center">
+                                <div class="flex space-x-2">
+                                    <button class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                        <i data-lucide="image" class="h-5 w-5"></i>
+                                    </button>
+                                    <button class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                        <i data-lucide="smile" class="h-5 w-5"></i>
+                                    </button>
+                                </div>
+                                <button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                                    Comment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Comments List -->
+                    <div class="space-y-6">
+                        {% for comment in event.comments.all %}
+                        <div class="flex space-x-4">
+                            <img src="{{ comment.user.avatar }}" alt="{{ comment.user.name }}" class="h-10 w-10 rounded-full">
+                            <div class="flex-1">
+                                <div class="bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-3">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="font-medium text-gray-900 dark:text-white">{{ comment.user.name }}</span>
+                                        <span class="text-sm text-gray-500">{{ comment.created_at|timesince }} ago</span>
+                                    </div>
+                                    <p class="text-gray-700 dark:text-gray-300">{{ comment.text }}</p>
+                                </div>
+                                
+                                <!-- Comment Actions -->
+                                <div class="mt-2 flex items-center space-x-4 text-sm">
+                                    <button class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Like</button>
+                                    <button @click="replyingTo = {{ comment.id }}" 
+                                            class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Reply</button>
+                                    <span class="text-gray-500">{{ comment.likes_count }} likes</span>
+                                </div>
+
+                                <!-- Reply Input -->
+                                <div x-show="replyingTo === {{ comment.id }}" class="mt-4">
+                                    <div class="flex space-x-4">
+                                        <img src="{{ user.avatar }}" alt="{{ user.name }}" class="h-8 w-8 rounded-full">
+                                        <div class="flex-1">
+                                            <textarea rows="2" 
+                                                      class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                                      placeholder="Write a reply..."></textarea>
+                                            <div class="mt-2 flex justify-end space-x-2">
+                                                <button @click="replyingTo = null" 
+                                                        class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                                                    Cancel
+                                                </button>
+                                                <button class="px-3 py-1 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700">
+                                                    Reply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Replies -->
+                                {% if comment.replies.exists %}
+                                <div class="mt-4 space-y-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                                    {% for reply in comment.replies.all %}
+                                    <div class="flex space-x-4">
+                                        <img src="{{ reply.user.avatar }}" alt="{{ reply.user.name }}" class="h-8 w-8 rounded-full">
+                                        <div class="flex-1">
+                                            <div class="bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <span class="font-medium text-gray-900 dark:text-white">{{ reply.user.name }}</span>
+                                                    <span class="text-sm text-gray-500">{{ reply.created_at|timesince }} ago</span>
+                                                </div>
+                                                <p class="text-gray-700 dark:text-gray-300">{{ reply.text }}</p>
+                                            </div>
+                                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                                <button class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Like</button>
+                                                <span class="text-gray-500">{{ reply.likes_count }} likes</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Event Info and Actions -->
+            <div class="space-y-6">
+                <!-- Organizer Info -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Organized by</h3>
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ event.club.image }}" alt="{{ event.club.name }}" class="h-12 w-12 rounded-full">
+                        <div>
+                            <h4 class="font-medium text-gray-900 dark:text-white">{{ event.club.name }}</h4>
+                            <p class="text-sm text-gray-500">{{ event.club.member_count }} members</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Stats -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Event Stats</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-400">Participants</span>
+                            <span class="font-medium text-gray-900 dark:text-white">{{ event.participants_count }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-400">Comments</span>
+                            <span class="font-medium text-gray-900 dark:text-white">{{ event.comments.count }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 dark:text-gray-400">Reactions</span>
+                            <span class="font-medium text-gray-900 dark:text-white">{{ event.reactions.count }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Share Event -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Share Event</h3>
+                    <div class="flex space-x-4">
+                        <button class="flex-1 flex items-center justify-center space-x-2 p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="facebook" class="h-5 w-5"></i>
+                        </button>
+                        <button class="flex-1 flex items-center justify-center space-x-2 p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover :bg-gray-700">
+                            <i data-lucide="twitter" class="h-5 w-5"></i>
+                        </button>
+                        <button class="flex-1 flex items-center justify-center space-x-2 p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="linkedin" class="h-5 w-5"></i>
+                        </button>
+                        <button class="flex-1 flex items-center justify-center space-x-2 p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i data-lucide="link" class="h-5 w-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Gallery Modal -->
+    <div x-show="showMediaGallery" 
+         class="fixed inset-0 z-50 overflow-y-auto" 
+         @keydown.escape="showMediaGallery = false">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+            </div>
+
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <div class="absolute top-0 right-0 pt-4 pr-4">
+                    <button @click="showMediaGallery = false" 
+                            class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    <!-- Media Display -->
+                    <div class="relative">
+                        <template x-if="event.media[currentMediaIndex].type === 'image'">
+                            <img :src="event.media[currentMediaIndex].url" 
+                                 :alt="event.title"
+                                 class="w-full h-full object-contain">
+                        </template>
+                        <template x-if="event.media[currentMediaIndex].type === 'video'">
+                            <video controls class="w-full">
+                                <source :src="event.media[currentMediaIndex].url" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </template>
+
+                        <!-- Navigation Buttons -->
+                        <button @click="currentMediaIndex = Math.max(0, currentMediaIndex - 1)"
+                                x-show="currentMediaIndex > 0"
+                                class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full p-2 text-white hover:bg-opacity-75">
+                            <i data-lucide="chevron-left" class="h-6 w-6"></i>
+                        </button>
+                        <button @click="currentMediaIndex = Math.min(event.media.length - 1, currentMediaIndex + 1)"
+                                x-show="currentMediaIndex < event.media.length - 1"
+                                class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 rounded-full p-2 text-white hover:bg-opacity-75">
+                            <i data-lucide="chevron-right" class="h-6 w-6"></i>
+                        </button>
+                    </div>
+
+                    <!-- Thumbnails -->
+                    <div class="mt-4 flex space-x-2 overflow-x-auto">
+                        <template x-for="(media, index) in event.media" :key="index">
+                            <button @click="currentMediaIndex = index"
+                                    :class="{'ring-2 ring-indigo-500': currentMediaIndex === index}"
+                                    class="flex-none w-20 h-20 rounded-lg overflow-hidden">
+                                <template x-if="media.type === 'image'">
+                                    <img :src="media.url" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="media.type === 'video'">
+                                    <div class="relative w-full h-full">
+                                        <img :src="media.thumbnail" class="w-full h-full object-cover">
+                                        <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                            <i data-lucide="play" class="h-6 w-6 text-white"></i>
+                                        </div>
+                                    </div>
+                                </template>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

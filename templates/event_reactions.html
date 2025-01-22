@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900">
+    <!-- Header -->
+    <div class="bg-white dark:bg-gray-800 shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{{ event.get_absolute_url }}" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <i data-lucide="arrow-left" class="h-6 w-6"></i>
+                    </a>
+                    <h1 class="ml-4 text-2xl font-bold text-gray-900 dark:text-white">Reactions</h1>
+                </div>
+                <div class="flex items-center space-x-2">
+                    {% for reaction_type in reaction_types %}
+                    <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <img src="{{ reaction_type.icon }}" alt="{{ reaction_type.name }}" class="h-6 w-6">
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reaction Tabs -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" x-data="{ activeTab: 'all' }">
+        <div class="border-b border-gray-200 dark:border-gray-700">
+            <nav class="-mb-px flex space-x-8">
+                <button @click="activeTab = 'all'"
+                        :class="{'border-indigo-500 text-indigo-600 dark:text-indigo-400': activeTab === 'all',
+                                'border-transparent text-gray-500 dark:text-gray-400': activeTab !== 'all'}"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    All
+                    <span class="ml-2 text-gray-400">({{ reactions.count }})</span>
+                </button>
+                {% for reaction_type in reaction_types %}
+                <button @click="activeTab = '{{ reaction_type.id }}'"
+                        :class="{'border-indigo-500 text-indigo-600 dark:text-indigo-400': activeTab === '{{ reaction_type.id }}',
+                                'border-transparent text-gray-500 dark:text-gray-400': activeTab !== '{{ reaction_type.id }}'}"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <img src="{{ reaction_type.icon }}" alt="{{ reaction_type.name }}" class="inline-block h-4 w-4 mr-1">
+                    {{ reaction_type.name }}
+                    <span class="ml-1 text-gray-400">({{ reaction_type.count }})</span>
+                </button>
+                {% endfor %}
+            </nav>
+        </div>
+
+        <!-- Reactions List -->
+        <div class="mt-6">
+            <template x-if="activeTab === 'all'">
+                <div class="space-y-4">
+                    {% for reaction in reactions %}
+                    <div class="flex items-center justify-between py-4">
+                        <div class="flex items-center space-x-4">
+                            <img src="{{ reaction.user.avatar }}" alt="{{ reaction.user.name }}" class="h-10 w-10 rounded-full">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">{{ reaction.user.name }}</h3>
+                                <p class="text-sm text-gray-500">{{ reaction.created_at|timesince }} ago</p>
+                            </div>
+                        </div>
+                        <img src="{{ reaction.type.icon }}" alt="{{ reaction.type.name }}" class="h-6 w-6">
+                    </div>
+                    {% endfor %}
+                </div>
+            </template>
+
+            {% for reaction_type in reaction_types %}
+            <template x-if="activeTab === '{{ reaction_type.id }}'">
+                <div class="space-y-4">
+                    {% for reaction in reaction_type.reactions %}
+                    <div class="flex items-center justify-between py-4">
+                        <div class="flex items-center space-x-4">
+                            <img src="{{ reaction.user.avatar }}" alt="{{ reaction.user.name }}" class="h-10 w-10 rounded-full">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">{{ reaction.user.name }}</h3>
+                                <p class="text-sm text-gray-500">{{ reaction.created_at|timesince }} ago</p>
+                            </div>
+                        </div>
+                        <img src="{{ reaction_type.icon }}" alt="{{ reaction_type.name }}" class="h-6 w-6">
+                    </div>
+                    {% endfor %}
+                </div>
+            </template>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}
